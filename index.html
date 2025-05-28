@@ -138,18 +138,41 @@
   </footer>
 
   <script>
-    function answerQuestion() {
-      const question = document.getElementById("questionInput").value.toLowerCase();
-      const responseBox = document.getElementById("responseBox");
+   <script>
+  const apiKey = 'YOUR_API_KEY'; // replace with your real API key
+  const cx = 'YOUR_CX_ID';       // replace with your Custom Search Engine ID
 
-      if (!question) {
-        responseBox.textContent = "Please enter a question.";
-        return;
+  async function answerQuestion() {
+    const question = document.getElementById("questionInput").value;
+    const responseBox = document.getElementById("responseBox");
+
+    if (!question.trim()) {
+      responseBox.textContent = "Please enter a question.";
+      return;
+    }
+
+    responseBox.textContent = "Searching...";
+
+    const query = encodeURIComponent(question);
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items && data.items.length > 0) {
+        const firstResult = data.items[0];
+        responseBox.innerHTML = `
+          <strong>${firstResult.title}</strong><br/>
+          ${firstResult.snippet}<br/>
+          <a href="${firstResult.link}" target="_blank">Learn more</a>
+        `;
+      } else {
+        responseBox.textContent = "No results found for that question. Try rephrasing.";
       }
-
-      // VERY basic fake answers – just for demonstration.
-      if (question.includes("pothole")) {
-        responseBox.textContent = "You can report a pothole to Westford Highway Department here: https://westfordma.gov/391/Highway-Department";
-      } else if (question.includes("trash")) {
-        responseBox.textContent = "Trash pickup info is on this page: https://westfordma.gov/363/Trash-Recycling";
-      } else if (question.includes("dog license")) {
+    } catch (error) {
+      console.error(error);
+      responseBox.textContent = "Something went wrong. Please try again later.";
+    }
+  }
+</script>
